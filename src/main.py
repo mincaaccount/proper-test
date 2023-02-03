@@ -1,5 +1,4 @@
 import os
-import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -7,11 +6,17 @@ PAGE_URL = "https://icanhas.cheezburger.com/"
 MEMES_FOLDER = "memes"
 
 
+def get_next_page_for_memes(page_url, page_count):
+    return page_url + "page/" + str(page_count)
+
+
 def _get_memes_from_page(count):
     urls = get_url_memes_list(PAGE_URL)
-
+    page_count = 2
     while len(urls) <= count:
-        urls += get_url_memes_list(PAGE_URL)
+        next_game_url = get_next_page_for_memes(PAGE_URL, page_count)
+        urls += get_url_memes_list(next_game_url)
+        page_count += 1
 
     _saving_memes_in_folder(urls, count)
 
