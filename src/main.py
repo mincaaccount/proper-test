@@ -1,12 +1,16 @@
 import os
+from queue import Queue
+import multiprocessing
 import requests
 from bs4 import BeautifulSoup
 
 PAGE_URL = "https://icanhas.cheezburger.com/"
 MEMES_FOLDER = "memes"
+THREADS = 0
+q = Queue()
 
 
-def get_next_page_for_memes(page_url, page_count):
+def get_next_page(page_url, page_count):
     return page_url + "page/" + str(page_count)
 
 
@@ -14,7 +18,7 @@ def _get_memes_from_page(count):
     urls = get_url_memes_list(PAGE_URL)
     page_count = 2
     while len(urls) <= count:
-        next_game_url = get_next_page_for_memes(PAGE_URL, page_count)
+        next_game_url = get_next_page(PAGE_URL, page_count)
         urls += get_url_memes_list(next_game_url)
         page_count += 1
 
@@ -41,6 +45,17 @@ def _saving_memes_in_folder(urls, count):
 
 if __name__ == '__main__':
     os.mkdir(MEMES_FOLDER)
-    meme_amount = input("How many memes would you like to download?\n")
-    print("Searching URLs")
-    _get_memes_from_page(int(meme_amount))
+    jobs = []
+
+    while True:
+        THREADS = int(input("How many threads would you like to use? (1 min, 5 max)\n"))
+        if 1 <= THREADS <= 5:
+            break
+
+    while True:
+        meme_amount = int(input("How many memes would you like to download?\n"))
+        if meme_amount > 0:
+            _get_memes_from_page(meme_amount)
+            break
+        if meme_amount <= 0:
+            print("Please submit a valid number")
